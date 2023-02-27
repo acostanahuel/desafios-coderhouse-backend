@@ -10,6 +10,8 @@ import __dirname from "./util.js";
 
 
 
+
+
 const productManager = new ProductManager();
 const products = await productManager.getProducts();
 
@@ -42,12 +44,24 @@ const httpServer = app.listen(8080, () => {
     // console.log(__dirname + "/views");
 });
 
-const socketServer = new Server (httpServer);
 
-socketServer.on('connection', socket => {
-  console.log("nuevo cliente conectado");
 
-  socket.on (`message`, data => {
-    console.log(data);
+
+
+const socketServer = new Server(httpServer);
+
+socketServer.on('connection', (socket) => {
+  console.log(`Nuevo cliente conectado: ${socket.id}`);
+  socket.emit('message', 'New user say "Hello"');
+
+  socket.on('disconnect', () => {
+    console.log('El cliente se ha desconectado');
+  });
+
+  socket.on('update-products', async () => {
+    console.log('Actualizando productos...');
+    const updatedProducts = await productManager.getProducts();
+    socket.emit('updated-products', updatedProducts);
   });
 });
+   
