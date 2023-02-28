@@ -1,90 +1,45 @@
-import express  from "express";
-import productsRouter from "./routes/products.router.js";
-import cartRouter from "./routes/cart.router.js";
-import handlebars from "express-handlebars";
-import ProductManager from "./ProductManager.js";
-import viewRouter from "./routes/views.router.js";
-import {Server} from "socket.io";
-import __dirname from "./util.js";
-
-
-
-
-
-
-const productManager = new ProductManager();
-const products = await productManager.getProducts();
-
-
+import express from 'express';
+import __dirname from './util.js';
+import { Server } from 'socket.io';
+import handlebars from 'express-handlebars';
+import ProductsRouter from './routes/products.router.js';
+import CartsRouter from './routes/carts.router.js';
+import ViewsRouter from './routes/views.router.js';
+import ProductManager from './ProductManager.js';
 
 const app = express();
+const productManager = new ProductManager();
+productManager.getProducts();
+
+// handlebars use
+app.engine('handlebars', handlebars.engine());
+app.set('views', __dirname + "/views");
+app.set('view engine', 'handlebars');
+// JSON encode
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use (express.static(__dirname+`/public`));
+// public folder
+app.use(express.static(__dirname + '/public'));
+// Routers
+app.use(`/api/products`, ProductsRouter);
+app.use(`/api/carts`, CartsRouter);
+app.use(`/api/views`, ViewsRouter);
 
-//Handlebars
-//Uso de vista de plantillas
-app.engine (`handlebars`, handlebars.engine());
-app.set('views', __dirname + "/views");
-app.set('view engine', 'handlebars');       //nos permite usar response.render() el handlebars
-
-
-
-///delegamos, le decimos a app que use el router
-app.use(`/api/products`, productsRouter); 
-app.use(`/api/cart`, cartRouter);  
-app.use(`/api/views`, viewRouter);
-
-// console.log(products);
 const SERVER_PORT = 8080;
-
-
-const httpServer = app.listen(8080, () => {
-    console.log("Server listening in " + SERVER_PORT);
-    // console.log(__dirname + "/views");
+const httpServer = app.listen(SERVER_PORT, () => {
+  console.log(`Server running in port ${SERVER_PORT}`);
+  console.log(__dirname);
 });
-
-
-
-
 
 const socketServer = new Server(httpServer);
 
-socketServer.on('connection', (socket) => {
-  console.log(`Nuevo cliente conectado: ${socket.id}`);
-  socket.emit('message', 'New user say "Hello"');
+socketServer.on('connection', socket => {
+  console.log('new user conected:', socket.id);
 
-  socket.on('disconnect', () => {
-    console.log('El cliente se ha desconectado');
-  });
+  socket.on('client:message', msg => { console.log(msg); });
 
-  socket.on('update-products', async () => {
-    console.log('Actualizando productos...');
-    const updatedProducts = await productManager.getProducts();
-    socket.emit('updated-products', updatedProducts);
+  socket.on('client:products', async ()=> {
+    const Products =  await productManager.getProducts();
+    socket.emit('server:products', Products);
   });
 });
-   
-
-
-
-//o también tengo esta opcion 2
-const socket = io();
-socket.emit("client:message", 'HI I AM A NEW USER CONNECTED ')
-
-socket.emit('client:products', "requier the products")
-
-socket.on('server:productsUp', (data) => {
-  console.log(data)
-  socket.emit('client:productsUpdate', data )
-});
-
-socket.on('server:updateProducts', (data)=> {
-  if(data){
-    console.log("products al dia")
-    
-  } else {
-    console.log("products para actualizar")
-
-  }
-})
