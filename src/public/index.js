@@ -15,6 +15,7 @@ const addProductsToRealTime = (products) => {
   products.forEach(p => {
     html += `
   <div>
+  <h1> Producto </h1>
   <p>title: ${p.title} </p>
   <p>description: ${p.description} </p>
   <p>price: ${p.price} </p>
@@ -25,3 +26,4 @@ const addProductsToRealTime = (products) => {
     productsContainer.innerHTML = html;
   });
 };
+
