@@ -1,9 +1,10 @@
 const productsContainer = document.querySelector('#products-container');
 const socket = io();
-socket.emit('client:message', 'HI I AM A NEW USER CONNECTED');
+socket.emit('client:message', 'NEW USER CONNECTED');
 
 setInterval(() => {
-  socket.emit('client:products');}, 3000);
+  socket.emit('client:products');
+},3000);
 
 socket.on('server:products', async (Products) => {
   addProductsToRealTime(Products);
@@ -13,19 +14,13 @@ const addProductsToRealTime = (products) => {
   let html = '';
   products.forEach(p => {
     html += `
-    <div class="col-lg-4 d-flex justify-content-center align-item-center p-5">
-    <div class="card shadow" style="width: 18rem;">
-      <img src="${p.thumbnail}" class="card-img-top" alt="thumbnail: ${p.thumbnail}">
-      <div class="card-body">
-        <h5 class="card-title">Title: ${p.title}</h5>
-        <p class="card-text">Description: ${p.description}</p>
-      </div>
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item">Price: ${p.price}</li>
-        <li class="list-group-item">Status: ${p.status}</li>
-        <li class="list-group-item">Category: ${p.category}</li>
-      </ul>
-    </div>
+  <div>
+  <p>title: ${p.title} </p>
+  <p>description: ${p.description} </p>
+  <p>price: ${p.price} </p>
+  <p>status: ${p.status} </p>
+  <p>category: ${p.category} </p>
+  <p>thumbnail: ${p.thumbnail} </p>
   </div>`
     productsContainer.innerHTML = html;
   });
