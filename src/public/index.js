@@ -2,9 +2,7 @@ const productsContainer = document.querySelector('#products-container');
 const socket = io();
 socket.emit('client:message', 'NEW USER CONNECTED');
 
-setInterval(() => {
-  socket.emit('client:products');
-},3000);
+socket.emit('client:products');
 
 socket.on('server:products', async (Products) => {
   addProductsToRealTime(Products);
