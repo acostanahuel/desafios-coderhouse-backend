@@ -1,11 +1,14 @@
-import express from 'express';
-import __dirname from './util.js';
-import { Server } from 'socket.io';
-import handlebars from 'express-handlebars';
-import ProductsRouter from './routes/products.router.js';
-import CartsRouter from './routes/carts.router.js';
-import ViewsRouter from './routes/views.router.js';
-import ProductManager from './ProductManager.js';
+import express from "express";
+import __dirname from "./util.js";
+import { Server } from "socket.io";
+import handlebars from "express-handlebars";
+import ProductsRouter from "./routes/products.router.js";
+import CartsRouter from "./routes/carts.router.js";
+import ViewsRouter from "./routes/views.router.js";
+import ProductManager from "./Dao/filesystem/ProductManager.js";
+import mongoose from 'mongoose';
+
+
 
 const app = express();
 const productManager = new ProductManager();
@@ -43,3 +46,14 @@ socketServer.on('connection', socket => {
     socket.emit('server:products', Products);
   });
 });
+
+const connectMongoDB = async ()=>{
+  try {
+      await mongoose.connect('mongodb+srv://dnacostab:1713na@cluster0.w7tlxyp.mongodb.net/ecommerce?retryWrites=true&w=majority'); //DB products en MONGO ATLAS
+      console.log("Conectado con exito a MongoDB usando Moongose.");
+  } catch (error) {
+      console.error("No se pudo conectar a la BD usando Moongose: " + error);
+      process.exit();
+  }
+};
+connectMongoDB();
